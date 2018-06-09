@@ -13,11 +13,12 @@ class DBHelper {
   }
 
   /**
-   * Fetch all restaurants.
+   * Fetch all restaurants.Access-Control-Allow-Origin
    */
   static fetchRestaurants(callback) {
     let xhr = new XMLHttpRequest();
     xhr.open('GET', DBHelper.DATABASE_URL);
+    xhr.setRequestHeader('Access-Control-Allow-Headers', '*');
     xhr.onload = () => {
       if (xhr.status === 200) { // Got a success response from server!
         const json = JSON.parse(xhr.responseText);

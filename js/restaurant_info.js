@@ -1,6 +1,8 @@
 let restaurant;
 var map;
 
+const imgSizes = ['-200', '-300', '-600', '-900', '-1200'];
+
 /**
  * Initialize Google map, called from HTML.
  */
@@ -49,15 +51,30 @@ fetchRestaurantFromURL = (callback) => {
  * Create restaurant HTML and add it to the webpage
  */
 fillRestaurantHTML = (restaurant = self.restaurant) => {
+  const imgUrl = DBHelper.imageUrlForRestaurant(restaurant);
+  let sourceURL = '';
+
+  for(let size of imgSizes) {
+    let sizeVal = size.substring(1) + 'w';
+    if (sourceURL != '') sourceURL += ', ';
+    let sourceArr = imgUrl.split('.')
+    let sizeURL = sourceArr[0] + size + '.' + sourceArr[1] + ' ' + sizeVal;
+    sourceURL += sizeURL;
+  }
+
   const name = document.getElementById('restaurant-name');
   name.innerHTML = restaurant.name;
 
   const address = document.getElementById('restaurant-address');
   address.innerHTML = restaurant.address;
 
+const source = document.getElementById('restaurant-img-source');
+source.setAttribute('srcset', sourceURL);
+
   const image = document.getElementById('restaurant-img');
   image.className = 'restaurant-img'
   image.src = DBHelper.imageUrlForRestaurant(restaurant);
+  image.setAttribute('alt', 'Picture of ' + restaurant.name);
 
   const cuisine = document.getElementById('restaurant-cuisine');
   cuisine.innerHTML = restaurant.cuisine_type;
@@ -142,7 +159,8 @@ createReviewHTML = (review) => {
 fillBreadcrumb = (restaurant=self.restaurant) => {
   const breadcrumb = document.getElementById('breadcrumb');
   const li = document.createElement('li');
-  li.innerHTML = restaurant.name;
+  li.classList.add('nav-button');
+  li.textContent = restaurant.name;
   breadcrumb.appendChild(li);
 }
 

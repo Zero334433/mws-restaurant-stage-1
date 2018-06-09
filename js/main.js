@@ -4,6 +4,8 @@ let restaurants,
 var map
 var markers = []
 
+const imgSizes = ['-200', '-300', '-600', '-900', '-1200'];
+
 /**
  * Fetch neighborhoods and cuisines as soon as the page is loaded.
  */
@@ -136,26 +138,44 @@ fillRestaurantsHTML = (restaurants = self.restaurants) => {
  * Create restaurant HTML.
  */
 createRestaurantHTML = (restaurant) => {
+  const imgUrl = DBHelper.imageUrlForRestaurant(restaurant);
+  let sourceURL = '';
+
+  for (let size of imgSizes) {
+    let sizeVal = size.substring(1) + 'w';
+    if (sourceURL != '') sourceURL += ', ';
+    let sourceArr = imgUrl.split('.')
+    let sizeURL = sourceArr[0] + size + '.' + sourceArr[1] + ' ' + sizeVal;
+    sourceURL += sizeURL;
+  }
+
   const li = document.createElement('li');
 
-  const image = document.createElement('img');
-  image.className = 'restaurant-img';
-  image.src = DBHelper.imageUrlForRestaurant(restaurant);
-  li.append(image);
+  const picture = document.createElement('picture');
+  const source = document.createElement('source');
 
-  const name = document.createElement('h1');
+  source.setAttribute('srcset', sourceURL);
+
+  const image = document.createElement('img');
+  image.setAttribute('alt', 'Picture of ' + restaurant.name);
+  image.className = 'restaurant-img';
+  image.src = imgUrl;
+  picture.append(source);
+  picture.append(image);
+  li.append(picture);
+
+  const name = document.createElement('h2');
   name.innerHTML = restaurant.name;
   li.append(name);
 
-  const neighborhood = document.createElement('p');
-  neighborhood.innerHTML = restaurant.neighborhood;
-  li.append(neighborhood);
-
   const address = document.createElement('p');
-  address.innerHTML = restaurant.address;
+  address.innerHTML = restaurant.neighborhood + '<br>' + restaurant.address;
+  address.setAttribute('id', restaurant.name.split(' ').join('') + 'info');
   li.append(address);
 
   const more = document.createElement('a');
+  more.setAttribute('aria-label', restaurant.name);
+  more.setAttribute('aria-describedby', restaurant.name.split(' ').join('') + 'info');
   more.innerHTML = 'View Details';
   more.href = DBHelper.urlForRestaurant(restaurant);
   li.append(more)
@@ -175,4 +195,9 @@ addMarkersToMap = (restaurants = self.restaurants) => {
     });
     self.markers.push(marker);
   });
+}
+
+//Service Worker
+if (navigator.serviceWorker) {
+  navigator.serviceWorker.register('sw.js');
 }
